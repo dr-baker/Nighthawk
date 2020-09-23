@@ -1,0 +1,42 @@
+#!/bin/bash
+
+########## 
+# Bash script ran once to organize data CSVs downloaded from firstratedata.
+# Downloads come in 4 year periods, this script will combine these files
+# with matching tickers.
+########## Resources:
+# https://linuxhint.com/bash_globbing_tutorial/
+# https://stackabuse.com/substrings-in-bash/
+# https://delightlylinux.wordpress.com/2017/04/08/put-filenames-in-bash-array/
+
+# in file format: TICKER_start_end.txt
+printf '\n\nCombining matching tickers.\n----------------------------------\n'
+
+cd /Users/Daniel/Desktop/Nighthawk/lib/Pre_2020_Tickers_Q_Z/test
+
+# move all files in subdirs to root dir
+# mv **/* . 
+
+# extract ticker from file name
+declare -a tickers
+tickers=$(ls *_*_*.txt | cut -d'_' -f 1 | sort -u)
+
+echo "Tickers: "
+echo ${tickers[@]}
+
+mkdir combined
+# find other files with matching ticker
+for t in ${tickers[@]}
+do
+	# extract years
+	y1=$(ls "$t"_*_*.txt | head -n 1 | cut -d'_' -f 2)
+	y2=$(ls "$t"_*_*.txt | tail -n 1 | cut -d'_' -f 3)
+	# concat files
+	cat $t* > combined/"$t"_"$y1"_"$y2"
+
+	# remove component files
+	ls "$t"_*_*.txt | rm 
+done
+
+# out file format: TICKER_start1_end2.txt
+printf '\n-----------------------------------------\n\n'
